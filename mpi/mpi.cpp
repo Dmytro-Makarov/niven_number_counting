@@ -48,26 +48,34 @@ int main(int argc, char* argv[]) {
     std::iota(numbers.begin(), numbers.end(), 1);
 
     uint32_t segmentLen = numbers.size() / size;
-    uint32_t start = numbers.front() + rank * segmentLen;
-    uint32_t end;
+//    uint32_t start = numbers.front() + rank * segmentLen;
+//    uint32_t end;
+//
+//    if (rank == size - 1) {
+//        end = numbers.size();
+//    } else {
+//        end = start + segmentLen - 1;
+//    }
 
-    if (rank == size - 1) {
-        end = numbers.size();
-    } else {
-        end = start + segmentLen - 1;
-    }
-
-    vector<uint32_t> segment(numbers.begin() + start, numbers.begin() + end);
+    vector<uint32_t> segment(segmentLen);
 
     auto startTime = MPI_Wtime();
+
+    MPI_Scatter(numbers.data(), segmentLen, MPI_UINT32_T, segment.data(), segmentLen, MPI_UINT32_T, 0, MPI_COMM_WORLD);
+
+    cout << segment.front() << endl;
 
     for (uint32_t i = 0; i < segment.size(); i++) {
         checked[i] = checkNieven(segment[i]);
     }
 
-    // Gather results from all processes
-    std::vector<uint32_t> allChecked(numbers.size());
-    MPI_Gather(checked.data(), checked.size(), MPI_UINT32_T, allChecked.data(), checked.size(), MPI_UINT32_T, 0, MPI_COMM_WORLD);
+    std::vector<uint32_t> allChecked;
+    if (rank == 0) {
+        // Gather results from all processes
+        allChecked.resize(numbers.size(), 0);
+    }
+
+    MPI_Gather(checked.data(), segmentLen, MPI_UINT32_T, allChecked.data(), segmentLen, MPI_UINT32_T, 0, MPI_COMM_WORLD);
 
     if (rank == 0) {
         cout << "N: " << arraySize << endl;
