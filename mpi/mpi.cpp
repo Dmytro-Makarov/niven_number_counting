@@ -48,14 +48,6 @@ int main(int argc, char* argv[]) {
     std::iota(numbers.begin(), numbers.end(), 1);
 
     uint32_t segmentLen = numbers.size() / size;
-//    uint32_t start = numbers.front() + rank * segmentLen;
-//    uint32_t end;
-//
-//    if (rank == size - 1) {
-//        end = numbers.size();
-//    } else {
-//        end = start + segmentLen - 1;
-//    }
 
     vector<uint32_t> segment(segmentLen);
 
